@@ -4,4 +4,4 @@ projext: yuntyos
 bootload: multiboot
 x86 AT&T grub
 coding testing building under Windows
-runing under bochs
+testing under bochs
