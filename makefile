@@ -92,7 +92,7 @@ run: iso
 # 运行 Bochs
 bochs: iso
 	@echo Running Bochs
-	@bochs -f boch.cfg
+	@bochs -f bochs.cfg
 
 # 调试模式
 debug: CFLAGS += -g
