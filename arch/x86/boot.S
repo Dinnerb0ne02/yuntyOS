@@ -14,8 +14,8 @@
     stack_top:
 
 .section .text
-    .global start_
-    start_:
+    .global _start
+    _start:
         movl $stack_top, %esp
         /*
             todo: kernel init

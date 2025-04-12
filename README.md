@@ -1,3 +1,23 @@
 # yuntyOS
 
-## special thanks : lunaixsky
+## info
+
+2025-03-30 15:43:10 created
+
+author: Dinnerb0ne<tomma_2022@outlook.com>
+
+projext: yuntyos
+
+bootload: multiboot
+
+x86 AT&T grub
+
+coding testing building under Windows
+
+testing under bochs
+
+
+## special thanks : 
+lunaixsky
+
+kimi AI (for study of kernel)

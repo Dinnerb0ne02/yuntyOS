@@ -5,3 +5,5 @@ bootload: multiboot
 x86 AT&T grub
 coding testing building under Windows
 testing under bochs
+
+tty output
