@@ -57,7 +57,11 @@ $(BUILD_DIR)/kernel.elf: $(OBJECTS)
 $(ISO_DIR)/boot/grub/core.img:
 	@echo Generating GRUB core image
 	@mkdir -p $(dir $@)
-	grub-mkimage -O i386-pc -o $@ -p "(hd0,msdos1)/boot/grub" minicmd normal gzio gcry_crc verifiers terminal priority_queue gettext extcmd datetime crypto bufio boot biosdisk part_gpt part_msdos fat ext2 fshelp net multiboot2 all_video gfxterm
+	@GRUB_MODULES_PATH=D:/MTY/Code/grub-2.06-for-windows/i386-pc/
+	@grub-mkimage -O i386-pc -o $@ -p "(hd0,msdos1)/boot/grub" \
+		minicmd normal gzio gcry_crc terminal priority_queue gettext \
+		extcmd datetime crypto bufio boot biosdisk part_gpt part_msdos \
+		fat ext2 fshelp net multiboot2 all_video gfxterm
 
 # 生成 GRUB 配置文件
 $(ISO_DIR)/boot/grub/grub.cfg:
@@ -80,9 +84,10 @@ iso: $(ISO_DIR)/boot/kernel.elf $(ISO_DIR)/boot/grub/grub.cfg $(ISO_DIR)/boot/gr
 
 # 清理
 clean:
-	@echo Cleaning...
-	@if exist $(BUILD_DIR) rmdir /s /q $(BUILD_DIR)
-	@if exist $(ISO_DIR) rmdir /s /q $(ISO_DIR)
+	@rm -rf $(BUILD_DIR)
+	@rm -rf $(ISO_DIR)
+	@rm -rf ./*.log
+	@echo Cleaned
 
 # 运行 QEMU
 run: iso
