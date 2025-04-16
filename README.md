@@ -12,12 +12,14 @@ bootload: multiboot
 
 x86 AT&T grub
 
-coding testing building under Windows
+coding, testing and building under Windows
 
-testing under bochs
+running with qemu
 
 
 ## special thanks : 
 lunaixsky
+
+FormingSystem
 
 kimi AI (for study of kernel)
