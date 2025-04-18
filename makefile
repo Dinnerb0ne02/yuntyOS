@@ -20,13 +20,13 @@ S_SOURCES := $(foreach dir,$(SOURCE_DIRS),$(wildcard $(dir)/*.S))
 OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_SOURCES)) $(patsubst %.S,$(BUILD_DIR)/%.o,$(S_SOURCES))
 
 # 编译选项 CFLAGS
-LDFLAGS := -nostdlib -T link/link.ld
+LDFLAGS := -m32 -nostdlib -T link/link.ld
 WARNINGS := -Wall -Wextra
 OPTIMIZATION := -O0
 DEBUG_FLAGS := -g
 
-CFLAGS := -I$(INCLUDE_DIR) -ffreestanding -mno-red-zone
-CFLAGS += $(WARNINGS) $(OPTIMIZATION) $(DEBUG_FLAGS)
+CFLAGS := -I$(INCLUDE_DIR) -ffreestanding -mno-red-zone -m32
+CFLAGS += $(OPTIMIZATION) $(DEBUG_FLAGS)
 
 
 
@@ -53,15 +53,32 @@ $(BUILD_DIR)/kernel.elf: $(OBJECTS)
 	@mkdir -p $(dir $@)
 	@$(LD) $(LDFLAGS) -o $@ $^
 
+
+GRUB_MODULES_PATH=D:/MTY/Code/grub-2.06-for-windows/i386-pc/
 # GRUB core
 $(ISO_DIR)/boot/grub/core.img:
-	@echo "[GRUB] Generating core image"
+	@echo "[GRUB] Deploying grub files"
+
+	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(ISO_DIR)/boot
+	@mkdir -p $(ISO_DIR)/boot/grub
+	@mkdir -p $(ISO_DIR)/boot/grub/fonts
+
+	@cp -r $(GRUB_DIR)/i386-pc $(ISO_DIR)/boot/grub/
+	@cp -r $(GRUB_DIR)/i386-efi $(ISO_DIR)/boot/grub/
+	@cp -r $(GRUB_DIR)/x86_64-efi $(ISO_DIR)/boot/grub/
+	@cp -r $(GRUB_DIR)/locale $(ISO_DIR)/boot/grub/
+	@cp $(GRUB_DIR)/*.pf2 $(ISO_DIR)/boot/grub/fonts/
 	@mkdir -p $(dir $@)
-	@GRUB_MODULES_PATH=D:/MTY/Code/grub-2.06-for-windows/i386-pc/
-	@grub-mkimage -O i386-pc -o $@ -p "(hd0,msdos1)/boot/grub" \
-		minicmd normal gzio gcry_crc terminal priority_queue gettext \
-		extcmd datetime crypto bufio boot biosdisk part_gpt part_msdos \
-		fat ext2 fshelp net multiboot2 all_video gfxterm
+
+	@echo "[GRUB] Generating core image"
+	@grub-mkimage --directory=$(ISO_DIR)/boot/grub/i386-pc \
+	    --prefix=/boot/grub \
+	    --output=$@ \
+	    --format=i386-pc-eltorito \
+	    --compression=auto \
+	    --config=$(ISO_DIR)/boot/grub/grub.cfg \
+	    biosdisk iso9660
 
 # GRUB config
 $(ISO_DIR)/boot/grub/grub.cfg:

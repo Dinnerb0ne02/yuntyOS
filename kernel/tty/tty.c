@@ -4,7 +4,7 @@
 // #define TTY_WIDTH 80
 // #define TTY_HEIGHT 25
 
-vga_attributes *buffer = 0xB800;
+vga_attributes *buffer = 0xB8000;
 
 vga_attributes theme_color = VGA_COLOR_BLACK;
 
