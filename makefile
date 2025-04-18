@@ -10,6 +10,7 @@ LD := ld
 BUILD_DIR := build
 INCLUDE_DIR := includes
 GRUB_DIR := grub
+GRUB_MODULES_PATH := $(GRUB_DIR)/i386-pc/
 ISO_DIR := iso
 
 SOURCE_DIRS := kernel arch/x86 hal
@@ -53,8 +54,6 @@ $(BUILD_DIR)/kernel.elf: $(OBJECTS)
 	@mkdir -p $(dir $@)
 	@$(LD) $(LDFLAGS) -o $@ $^
 
-
-GRUB_MODULES_PATH=D:/MTY/Code/grub-2.06-for-windows/i386-pc/
 # GRUB core
 $(ISO_DIR)/boot/grub/core.img:
 	@echo "[GRUB] Deploying grub files"
