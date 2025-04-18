@@ -1,25 +1,25 @@
-# 设置交叉编译器 (MinGW-w64 工具链)
+# 当程序为测试版时, 在版本头添加beta, 如果不是则不添加
+VERSION := beta 0.0.1
+NOTE := Hello World
+
+# 交叉编译器 (MinGW64 工具链)
 CC := x86_64-w64-mingw32-gcc
 LD := ld
 
-# 设置路径
+# 项目文件
 BUILD_DIR := build
 INCLUDE_DIR := includes
 GRUB_DIR := grub
 ISO_DIR := iso
 
-# 源文件目录列表
 SOURCE_DIRS := kernel arch/x86 hal
 
-# 自动查找所有源文件
 C_SOURCES := $(foreach dir,$(SOURCE_DIRS),$(wildcard $(dir)/*.c $(dir)/*/*.c))
 S_SOURCES := $(foreach dir,$(SOURCE_DIRS),$(wildcard $(dir)/*.S))
 
-# 生成目标文件路径
 OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_SOURCES)) $(patsubst %.S,$(BUILD_DIR)/%.o,$(S_SOURCES))
 
-# 编译选项
-CFLAGS := -I$(INCLUDE_DIR) -ffreestanding -mno-red-zone
+# 编译选项 CFLAGS
 LDFLAGS := -nostdlib -T link/link.ld
 WARNINGS := -Wall -Wextra
 OPTIMIZATION := -O0
@@ -27,6 +27,8 @@ DEBUG_FLAGS := -g
 
 CFLAGS := -I$(INCLUDE_DIR) -ffreestanding -mno-red-zone
 CFLAGS += $(WARNINGS) $(OPTIMIZATION) $(DEBUG_FLAGS)
+
+
 
 # 默认目标
 all: iso
@@ -51,7 +53,7 @@ $(BUILD_DIR)/kernel.elf: $(OBJECTS)
 	@mkdir -p $(dir $@)
 	@$(LD) $(LDFLAGS) -o $@ $^
 
-# 生成 GRUB 核心
+# GRUB core
 $(ISO_DIR)/boot/grub/core.img:
 	@echo "[GRUB] Generating core image"
 	@mkdir -p $(dir $@)
@@ -61,7 +63,7 @@ $(ISO_DIR)/boot/grub/core.img:
 		extcmd datetime crypto bufio boot biosdisk part_gpt part_msdos \
 		fat ext2 fshelp net multiboot2 all_video gfxterm
 
-# 生成 GRUB 配置文件
+# GRUB config
 $(ISO_DIR)/boot/grub/grub.cfg:
 	@echo "[GRUB] Creating configuration"
 	@mkdir -p $(dir $@)
@@ -69,18 +71,18 @@ $(ISO_DIR)/boot/grub/grub.cfg:
 	@echo "  multiboot2 /boot/kernel.elf" >> $@
 	@echo "  boot" >> $@
 
-# 复制内核文件到 ISO 目录
+# file
 $(ISO_DIR)/boot/kernel.elf: $(BUILD_DIR)/kernel.elf
 	@echo "[COPY] kernel.elf to ISO directory"
 	@mkdir -p $(dir $@)
 	@cp $< $@
 
-# 生成 ISO 文件
+# generate ISO 
 iso: $(ISO_DIR)/boot/kernel.elf $(ISO_DIR)/boot/grub/grub.cfg $(ISO_DIR)/boot/grub/core.img
 	@echo "[ISO] Creating ISO image"
 	@genisoimage -R -J -o $(BUILD_DIR)/YuntyOS.iso -b boot/grub/core.img -c boot/grub/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table $(ISO_DIR)
 
-# 清理
+
 clean:
 	@echo "[CLEAN] Cleaning build files"
 	@rm -rf $(BUILD_DIR)
@@ -88,10 +90,10 @@ clean:
 	@rm -rf ./*.log
 	@echo "[CLEAN] Done"
 
-# 运行 QEMU
+# run QEMU
 run: iso
 	@echo "[QEMU] Running QEMU"
-	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/kernel.iso -boot d
+	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/YuntyOS.iso -boot d
 
 # # 调试模式
 # debug: CFLAGS += -g
@@ -99,4 +101,4 @@ run: iso
 # debug: OPTIMIZATION := -O0
 # debug: all
 
-.PHONY: all clean iso run
+# PHONY: all clean iso run
