@@ -10,7 +10,6 @@ LD := ld
 BUILD_DIR := build
 INCLUDE_DIR := includes
 GRUB_DIR := grub
-GRUB_MODULES_PATH := $(GRUB_DIR)/i386-pc/
 ISO_DIR := iso
 
 SOURCE_DIRS := kernel arch/x86 hal
@@ -21,15 +20,13 @@ S_SOURCES := $(foreach dir,$(SOURCE_DIRS),$(wildcard $(dir)/*.S))
 OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_SOURCES)) $(patsubst %.S,$(BUILD_DIR)/%.o,$(S_SOURCES))
 
 # 编译选项 CFLAGS
-LDFLAGS := -m32 -nostdlib -T link/link.ld
+LDFLAGS := -nostdlib -T link/link.ld
 WARNINGS := -Wall -Wextra
 OPTIMIZATION := -O0
 DEBUG_FLAGS := -g
 
-CFLAGS := -I$(INCLUDE_DIR) -ffreestanding -mno-red-zone -m32
+CFLAGS := -I$(INCLUDE_DIR) -ffreestanding -mno-red-zone
 CFLAGS += $(OPTIMIZATION) $(DEBUG_FLAGS)
-
-
 
 # 默认目标
 all: iso
@@ -54,11 +51,10 @@ $(BUILD_DIR)/kernel.elf: $(OBJECTS)
 	@mkdir -p $(dir $@)
 	@$(LD) $(LDFLAGS) -o $@ $^
 
+
 # GRUB core
 $(ISO_DIR)/boot/grub/core.img:
 	@echo "[GRUB] Deploying grub files"
-
-	@mkdir -p $(BUILD_DIR)
 	@mkdir -p $(ISO_DIR)/boot
 	@mkdir -p $(ISO_DIR)/boot/grub
 	@mkdir -p $(ISO_DIR)/boot/grub/fonts
@@ -71,7 +67,7 @@ $(ISO_DIR)/boot/grub/core.img:
 	@mkdir -p $(dir $@)
 
 	@echo "[GRUB] Generating core image"
-	@grub-mkimage --directory=$(ISO_DIR)/boot/grub/i386-pc \
+	@./grub/grub-mkimage --directory=$(ISO_DIR)/boot/grub/i386-pc \
 	    --prefix=/boot/grub \
 	    --output=$@ \
 	    --format=i386-pc-eltorito \
@@ -98,23 +94,16 @@ iso: $(ISO_DIR)/boot/kernel.elf $(ISO_DIR)/boot/grub/grub.cfg $(ISO_DIR)/boot/gr
 	@echo "[ISO] Creating ISO image"
 	@genisoimage -R -J -o $(BUILD_DIR)/YuntyOS.iso -b boot/grub/core.img -c boot/grub/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table $(ISO_DIR)
 
-
 clean:
 	@echo "[CLEAN] Cleaning build files"
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(ISO_DIR)
-	@rm -rf ./*.log
+	@rm -f $(BUILD_DIR)/YuntyOS.iso
 	@echo "[CLEAN] Done"
 
 # run QEMU
 run: iso
 	@echo "[QEMU] Running QEMU"
 	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/YuntyOS.iso -boot d
-
-# # 调试模式
-# debug: CFLAGS += -g
-# debug: WARNINGS := -Wall
-# debug: OPTIMIZATION := -O0
-# debug: all
 
 # PHONY: all clean iso run
